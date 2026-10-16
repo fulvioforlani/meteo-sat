@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meteo Sat</title>
+<meta name="theme-color" content="#06101a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='14' fill='%2362e3d8'/%3E%3Cellipse cx='32' cy='32' rx='29' ry='11' fill='none' stroke='%23e4edf6' stroke-width='3' transform='rotate(-25 32 32)'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Icone SVG (tratto 1.6, 24px) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3 2.5 8 12 13l9.5-5L12 3Z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 16.5 9.5 5 9.5-5"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.4-.5-.8-.5-1.2 0-1 .8-1.7 1.7-1.7H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></symbol>
+    <symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 2v20"/><path d="m8 10-2 2 2 2M16 10l2 2-2 2"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21V3Z"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4.5M12 17.4v.1"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v11H3V8Z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.6 2.6 0 0 1 5 1c0 1.8-2.5 2.2-2.5 3.7M12 17v.1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5L7 4.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-first" viewBox="0 0 24 24"><path d="M6 5v14M17 5l-7 7 7 7"/></symbol>
+    <symbol id="i-last" viewBox="0 0 24 24"><path d="M18 5v14M7 5l7 7-7 7"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 3l3 3-3 3"/><path d="M4 12V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 12v3a3 3 0 0 1-3 3H4"/></symbol>
+    <symbol id="i-bounce" viewBox="0 0 24 24"><path d="M4 8h16M16 4l4 4-4 4"/><path d="M20 16H4M8 12l-4 4 4 4"/></symbol>
+    <symbol id="i-once" viewBox="0 0 24 24"><path d="M4 12h14M14 7l5 5-5 5"/><path d="M21 5v14"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.1"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13"/></symbol>
+    <symbol id="i-storm" viewBox="0 0 24 24"><path d="M12 12m-2.5 0a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0"/><path d="M16 5.5C14.8 4.6 13.4 4 12 4 7.6 4 4 7.6 4 12c0 1.3.3 2.5.9 3.6"/><path d="M8 18.5c1.2.9 2.6 1.5 4 1.5 4.4 0 8-3.6 8-8 0-1.3-.3-2.5-.9-3.6"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 21c3.9 0 6.5-2.7 6.5-6.3 0-4.4-4-6.6-4.5-10.7-2.8 1.8-4 4.5-3.6 7.2-1.2-.6-2-1.8-2.2-3.2C6.4 9.6 5.5 11.8 5.5 14.7 5.5 18.3 8.1 21 12 21Z"/><path d="M12 21c-1.7 0-2.8-1.2-2.8-2.8 0-2 1.6-2.8 2.4-4.6 1.4 1.4 3.2 2.4 3.2 4.6 0 1.6-1.1 2.8-2.8 2.8Z"/></symbol>
+    <symbol id="i-volcano" viewBox="0 0 24 24"><path d="M2.5 20 9 10h6l6.5 10h-19Z"/><path d="M10 10l1-2M14 10l-1-2"/><path d="M9 5c.8-1.6 2.5-1.6 3-1M13 4.5c1-.8 2.5-.4 3 .5"/></symbol>
+    <symbol id="i-dust" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h16a3 3 0 1 1-3 3"/><path d="M3 16h7"/><circle cx="18" cy="6" r=".6"/><circle cx="20.5" cy="10" r=".6"/><circle cx="13.5" cy="19" r=".6"/></symbol>
+    <symbol id="i-flood" viewBox="0 0 24 24"><path d="M3 14c1.5 0 1.5 1.2 3 1.2S7.5 14 9 14s1.5 1.2 3 1.2 1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/><path d="M3 18.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/><path d="M6 11V6.5L12 3l6 3.5V11"/></symbol>
+    <symbol id="i-ice" viewBox="0 0 24 24"><path d="M12 2.5v19M3.8 7.2l16.4 9.6M3.8 16.8l16.4-9.6"/><path d="m9.5 4.5 2.5 2 2.5-2M9.5 19.5l2.5-2 2.5 2"/></symbol>
+    <symbol id="i-quake" viewBox="0 0 24 24"><path d="M2 12h4l2-5 3 10 3-12 2.5 7H22"/></symbol>
+    <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.7-4.4L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.7 4.4L20 16"/><path d="M20 20v-4h-4"/></symbol>
+  </defs>
+</svg>
+
+<div class="boot" id="boot" role="status" aria-live="polite">
+  <svg viewBox="0 0 64 64" aria-hidden="true">
+    <circle cx="32" cy="32" r="12" fill="#62e3d8"/>
+    <g class="orbit"><ellipse cx="32" cy="32" rx="28" ry="10" fill="none" stroke="#e4edf6" stroke-width="2.5" transform="rotate(-25 32 32)"/><circle cx="57" cy="20" r="3" fill="#ffb547"/></g>
+  </svg>
+  <p id="bootMsg">Collegamento ai satelliti…</p>
+</div>
+
+<div id="map" aria-label="Mappa satellitare"></div>
+
+<header class="topbar">
+  <div class="brand glass">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="13" fill="#62e3d8"/><ellipse cx="32" cy="32" rx="29" ry="10.5" fill="none" stroke="#e4edf6" stroke-width="3" transform="rotate(-25 32 32)"/><circle cx="56.5" cy="20.5" r="3.4" fill="#ffb547"/></svg>
+    <div><div class="brand-name">Meteo Sat</div><div class="brand-sub">Osservazione satellitare in diretta</div></div>
+  </div>
+  <form class="search glass" id="searchForm" role="search" autocomplete="off">
+    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+    <label class="sr" for="searchInput">Cerca un luogo</label>
+    <input id="searchInput" type="search" placeholder="Cerca un luogo o scrivi 45.07, 7.68">
+    <div class="search-results glass" id="searchResults" role="listbox" aria-label="Risultati ricerca"></div>
+  </form>
+  <div class="spacer"></div>
+  <nav class="toolbar glass" aria-label="Strumenti">
+    <button class="tbtn" id="btnLayers" aria-pressed="true" data-tip="Livelli e palette (L)"><svg class="i"><use href="#i-layers"/></svg><span class="lbl">Livelli</span></button>
+    <button class="tbtn" id="btnEvents" aria-pressed="true" data-tip="Anomalie in corso (A)"><svg class="i"><use href="#i-alert"/></svg><span class="lbl">Anomalie</span></button>
+    <button class="tbtn" id="btnCompare" aria-pressed="false" data-tip="Confronto a tendina (C)"><svg class="i"><use href="#i-compare"/></svg><span class="lbl">Confronto</span></button>
+    <button class="tbtn" id="btnAutoDet" aria-pressed="true" data-tip="Dettaglio automatico: oltre lo zoom del satellite passa a VIS06 (0,5 km) o Sentinel-2 (30 m)"><svg class="i"><use href="#i-layers"/></svg><span class="lbl">Auto dettaglio</span></button>
+    <button class="tbtn" id="btnHiRes" data-tip="Attiva l'immagine più nitida disponibile al centro della mappa (H)"><svg class="i"><use href="#i-target"/></svg><span class="lbl">Alta risoluzione qui</span></button>
+    <span class="tsep"></span>
+    <button class="tbtn" id="btnPng" data-tip="Salva immagine PNG"><svg class="i"><use href="#i-camera"/></svg></button>
+    <button class="tbtn" id="btnGif" data-tip="Esporta animazione GIF"><svg class="i"><use href="#i-film"/></svg></button>
+    <button class="tbtn tbtn-txt" id="btnMp4" data-tip="Esporta video MP4 (H.264)"><svg class="i"><use href="#i-film"/></svg><span class="badge-mp4">MP4</span></button>
+    <button class="tbtn" id="btnLink" data-tip="Copia link di questa vista"><svg class="i"><use href="#i-link"/></svg></button>
+    <button class="tbtn" id="btnFull" data-tip="Schermo intero (F)"><svg class="i"><use href="#i-full"/></svg></button>
+    <button class="tbtn" id="btnHelp" data-tip="Guida rapida (?)"><svg class="i"><use href="#i-help"/></svg></button>
+  </nav>
+</header>
+
+<!-- Pannello sinistro: livelli / palette / confronto / viste -->
+<aside class="panel left glass" id="leftPanel" aria-label="Livelli">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="tLayers">Livelli <span class="count" id="stackCount">0</span></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="tPalette">Palette</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="tCompare">Confronto</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="tViews">Viste</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="tVolc">Vulcani</button>
+  </div>
+  <div class="panel-body">
+    <section class="tabpane" id="tLayers" role="tabpanel">
+      <div class="sec">
+        <div class="sec-h"><h3>In mappa</h3><span class="hint">dall'alto verso il basso</span></div>
+        <div class="stack" id="stack"></div>
+      </div>
+      <div class="sec coast-box" id="coastBox">
+        <div class="sec-h"><h3>Coste e confini</h3><label class="check" style="margin:0"><input type="checkbox" id="coastOn"> Mostra</label></div>
+        <p class="muted small" style="margin:0 0 8px">Linee sempre sopra tutti i satelliti, nitide a ogni zoom, anche mentre le immagini si caricano.</p>
+        <div class="field" style="grid-template-columns:70px 1fr"><label for="coastFonte">Fonte</label>
+          <select class="sel" id="coastFonte">
+            <option value="ne">Natural Earth 1:10m (vettoriale, consigliata)</option>
+            <option value="nasa">NASA GIBS (raster, linea sottile)</option>
+          </select>
+        </div>
+        <div id="coastNe">
+          <div class="coast-sets" id="coastSets"></div>
+          <div class="row coast-col" style="margin:6px 0 8px">
+            <span class="muted small">Colore</span>
+            <div class="row" id="coastPresets" style="gap:6px"></div>
+            <label class="sr" for="coastCol">Colore personalizzato</label><input type="color" id="coastCol" value="#ffffff" title="Colore personalizzato">
+          </div>
+          <div class="field"><label for="coastW">Spessore</label><input type="range" id="coastW" min="0.5" max="4" step="0.1" value="1.3"><output id="coastWo">1,3</output></div>
+          <div class="field"><label for="coastOp">Opacità</label><input type="range" id="coastOp" min="10" max="100" value="90"><output id="coastOpo">90</output></div>
+          <label class="check"><input type="checkbox" id="coastAlone"> Contorno di contrasto (leggibile su nubi e mare)</label>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-h"><h3>Catalogo</h3><span class="hint" id="catCount"></span></div>
+        <label class="sr" for="catFilter">Filtra layer</label>
+        <input class="filter-input" id="catFilter" type="search" placeholder="Filtra: infrarosso, GOES, polvere…">
+        <div id="catalog" style="margin-top:8px"></div>
+      </div>
+    </section>
+
+    <section class="tabpane" id="tPalette" role="tabpanel" hidden>
+      <div class="pal-target" id="palTarget"></div>
+      <div class="sec">
+        <div class="sec-h"><h3>Scala colori</h3><button class="btn ghost act" id="palNew"><svg class="i"><use href="#i-plus"/></svg>Nuova</button></div>
+        <div class="pal-grid" id="palGrid"></div>
+        <div class="editor" id="palEditor" hidden>
+          <div class="row" style="margin-bottom:10px">
+            <label class="sr" for="palName">Nome palette</label>
+            <input class="txt" id="palName" style="flex:1" placeholder="Nome della palette">
+          </div>
+          <div class="legend-bar" id="palEdBar"></div>
+          <div id="palStops" style="margin-top:10px"></div>
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <button class="btn ghost" id="palAddStop"><svg class="i"><use href="#i-plus"/></svg>Aggiungi colore</button>
+            <div class="row">
+              <button class="btn ghost" id="palDel">Elimina</button>
+              <button class="btn primary" id="palSave">Salva palette</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sec" id="palBlend">
+        <div class="sec-h"><h3>Fusione con i layer sotto</h3></div>
+        <div class="field"><label for="blendSel">Modalità</label><select class="sel" id="blendSel"></select></div>
+        <label class="check"><input type="checkbox" id="keyOn"> Trasparenza morbida: si vede solo la parte più intensa, il resto lascia vedere il layer sotto</label>
+        <div class="field"><label for="keyT" id="keyTL">Trasparente se più caldo di</label><input type="range" id="keyT" min="-90" max="50" value="-25"><output id="keyTo"></output></div>
+        <div class="field"><label for="keyW">Sfumatura</label><input type="range" id="keyW" min="2" max="80" value="15"><output id="keyWo"></output></div>
+      </div>
+      <div class="sec" id="palAdjust">
+        <div class="sec-h"><h3>Regolazioni</h3><button class="btn ghost act" id="palReset">Ripristina</button></div>
+        <div class="field"><label for="adjB">Luminosità</label><input type="range" id="adjB" min="-100" max="100" value="0"><output id="adjBo">0</output></div>
+        <div class="field"><label for="adjC">Contrasto</label><input type="range" id="adjC" min="-100" max="100" value="0"><output id="adjCo">0</output></div>
+        <div class="field"><label for="adjG">Gamma</label><input type="range" id="adjG" min="0.3" max="3" step="0.05" value="1"><output id="adjGo">1,00</output></div>
+        <div class="field"><label for="adjMin" id="adjMinL">Soglia fredda</label><input type="range" id="adjMin" min="-95" max="60" value="-90"><output id="adjMino">-90</output></div>
+        <div class="field"><label for="adjMax" id="adjMaxL">Soglia calda</label><input type="range" id="adjMax" min="-95" max="60" value="50"><output id="adjMaxo">50</output></div>
+        <label class="check"><input type="checkbox" id="adjCut"> Rendi trasparente oltre la soglia calda</label>
+        <div style="margin-top:12px">
+          <div class="legend-bar" id="palLegend"></div>
+          <div class="legend-ticks" id="palTicks"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tabpane" id="tCompare" role="tabpanel" hidden>
+      <div class="sec">
+        <p class="muted small" style="margin-top:0">Trascina la tendina sulla mappa: a sinistra la vista attuale, a destra il confronto.</p>
+        <div class="row" style="margin-bottom:12px">
+          <button class="btn primary" id="cmpToggle">Attiva confronto</button>
+        </div>
+        <div class="field" style="grid-template-columns:92px 1fr"><label for="cmpLayer">Layer destro</label><select class="sel" id="cmpLayer"></select></div>
+        <div class="field" style="grid-template-columns:92px 1fr"><label for="cmpOffset">Istante</label>
+          <select class="sel" id="cmpOffset">
+            <option value="0">Stesso fotogramma</option>
+            <option value="-60">1 ora prima</option>
+            <option value="-180">3 ore prima</option>
+            <option value="-360">6 ore prima</option>
+            <option value="-1440">1 giorno prima</option>
+            <option value="-4320">3 giorni prima</option>
+            <option value="-10080">7 giorni prima</option>
+            <option value="-43200">30 giorni prima</option>
+            <option value="-525600">1 anno prima</option>
+          </select>
+        </div>
+        <div class="field" style="grid-template-columns:92px 1fr 46px"><label for="cmpOpacity">Opacità</label><input type="range" id="cmpOpacity" min="0" max="100" value="100"><output id="cmpOpacityO">100</output></div>
+      </div>
+    </section>
+
+    <section class="tabpane" id="tVolc" role="tabpanel" hidden>
+      <div class="sec">
+        <div class="sec-h"><h3>Vulcani da satellite</h3><button class="btn ghost" id="vcRefresh" title="Cerca nuovi passaggi Sentinel-2">Aggiorna</button></div>
+        <p class="muted small">Sentinel-2 a 10 m: colori reali e bagliore della lava nell'infrarosso. Il monitor sul mini PC controlla ogni 6 ore.</p>
+        <div id="vcList"></div>
+      </div>
+      <div class="sec" id="vcView" hidden>
+        <div class="sec-h"><h3 id="vcTitle"></h3></div>
+        <div class="vc-img" id="vcStack"></div>
+        <div class="row vc-nav">
+          <button class="btn ghost" id="vcPrev" aria-label="Scena precedente">‹</button>
+          <input type="range" id="vcSlide" min="0" max="0" value="0" style="flex:1" aria-label="Scena">
+          <button class="btn ghost" id="vcNext" aria-label="Scena successiva">›</button>
+        </div>
+        <div class="row vc-nav">
+          <div class="vc-layers" id="vcLayers"></div>
+          <button class="btn" id="vcMap">Mostra sulla mappa</button>
+        </div>
+        <p class="small" id="vcMeta"></p>
+        <div id="vcVideoBox"></div>
+      </div>
+    </section>
+    <section class="tabpane" id="tViews" role="tabpanel" hidden>
+      <div class="sec">
+        <div class="sec-h"><h3>Salva la vista attuale</h3></div>
+        <form class="row" id="viewForm">
+          <label class="sr" for="viewName">Nome vista</label>
+          <input class="txt" id="viewName" style="flex:1" placeholder="Es. Mediterraneo infrarosso" required maxlength="60">
+          <button class="btn primary" type="submit">Salva</button>
+        </form>
+        <p class="muted small">Salva posizione, zoom, livelli, palette e intervallo di tempo.</p>
+      </div>
+      <div class="sec">
+        <div class="sec-h"><h3>Viste salvate</h3></div>
+        <div id="viewList"></div>
+      </div>
+    </section>
+  </div>
+</aside>
+
+<!-- Pannello destro: Anomalie -->
+<aside class="panel right glass" id="rightPanel" aria-label="Anomalie">
+  <div class="panel-head">
+    <h2>Anomalie in corso</h2>
+    <button class="ibtn" id="evRefresh" title="Aggiorna eventi"><svg class="i"><use href="#i-refresh"/></svg></button>
+    <button class="ibtn" id="evClose" title="Chiudi pannello"><svg class="i"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="panel-body">
+    <div class="follow" id="evFollow" hidden></div>
+    <div class="ev-summary" id="evSummary"></div>
+    <div class="sec">
+      <div class="chips" id="evCats" role="group" aria-label="Filtra per categoria"></div>
+    </div>
+    <div class="sec row" style="justify-content:space-between">
+      <span class="muted small">Gravità</span>
+      <div class="seg" id="evSev" role="group" aria-label="Filtra per gravità">
+        <button aria-pressed="true" data-v="0">Tutte</button>
+        <button aria-pressed="false" data-v="2">Medie e alte</button>
+        <button aria-pressed="false" data-v="3">Solo alte</button>
+      </div>
+    </div>
+    <div class="ev-list" id="evList"></div>
+  </div>
+</aside>
+
+<!-- Confronto: tendina -->
+<div class="swipe" id="swipe">
+  <span class="swipe-lbl a" id="swipeA"></span>
+  <span class="swipe-lbl b" id="swipeB"></span>
+  <button class="swipe-handle" id="swipeHandle" aria-label="Sposta la tendina di confronto"><svg class="i"><use href="#i-compare"/></svg></button>
+</div>
+
+<div class="probe" id="probe" aria-hidden="true"></div>
+
+<!-- Dock inferiore: animazione + barra di stato -->
+<footer class="dock glass" aria-label="Animazione">
+  <div class="tl">
+    <div class="transport">
+      <button class="ibtn" id="tFirst" title="Primo fotogramma (Home)"><svg class="i"><use href="#i-first"/></svg></button>
+      <button class="ibtn" id="tPrev" title="Fotogramma precedente (freccia sinistra)"><svg class="i"><use href="#i-prev"/></svg></button>
+      <button class="play" id="tPlay" title="Avvia o ferma (spazio)" aria-label="Avvia animazione"><svg><use href="#i-play"/></svg></button>
+      <button class="ibtn" id="tNext" title="Fotogramma successivo (freccia destra)"><svg class="i"><use href="#i-next"/></svg></button>
+      <button class="ibtn" id="tLast" title="Ultimo fotogramma (Fine)"><svg class="i"><use href="#i-last"/></svg></button>
+      <div class="frame-read">
+        <div class="big" id="frTime">--:--<small>UTC</small></div>
+        <div class="sub" id="frSub">--</div>
+      </div>
+    </div>
+    <div class="strip-wrap">
+      <div class="preload" id="preload"><b></b></div>
+      <div class="fr-ready" id="frReady" hidden aria-live="polite"></div>
+      <div class="strip" id="strip" role="slider" tabindex="0" aria-label="Fotogrammi" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"></div>
+      <div class="strip-axis" id="axis"></div>
+      <div class="strip-hover" id="stripHover"></div>
+    </div>
+    <div class="tl-right">
+      <div class="ranges" id="ranges" role="group" aria-label="Intervallo">
+        <button class="rbtn" data-r="60">1h</button>
+        <button class="rbtn" data-r="180">3h</button>
+        <button class="rbtn" data-r="360">6h</button>
+        <button class="rbtn" data-r="720">12h</button>
+        <button class="rbtn" data-r="1440">24h</button>
+        <button class="rbtn" data-r="2880">48h</button>
+        <button class="rbtn" data-r="10080">7g</button>
+        <button class="rbtn" data-r="custom" title="Intervallo personalizzato">Altro…</button>
+      </div>
+      <div class="tl-opts">
+        <button class="live-btn" id="liveBtn" aria-pressed="true" title="Diretta: aggiorna ogni 10 minuti"><span class="led"></span>Diretta</button>
+        <button class="live-btn acc" id="accBtn" aria-pressed="false" hidden title="Accumulo: mostra i millimetri di pioggia caduti dal primo fotogramma a quello mostrato (valori reali EUMETSAT)"><span class="led"></span>Accumulo</button>
+        <label class="sr" for="stepSel">Passo</label>
+        <select class="sel" id="stepSel" title="Passo fra i fotogrammi">
+          <option value="0">Passo auto</option>
+          <option value="10">10 min</option>
+          <option value="20">20 min</option>
+          <option value="30">30 min</option>
+          <option value="60">1 ora</option>
+          <option value="180">3 ore</option>
+          <option value="1440">1 giorno</option>
+        </select>
+        <button class="ibtn" id="loopBtn" title="Modalità: ciclo"><svg class="i"><use href="#i-loop"/></svg></button>
+        <div class="speed" title="Velocità"><span class="muted small" id="fpsO">6 f/s</span><input type="range" id="fps" min="1" max="15" value="6" aria-label="Velocità fotogrammi al secondo"></div>
+      </div>
+    </div>
+  </div>
+  <div class="status" id="status">
+    <span><span class="k">Italia</span><span id="stIt">--</span></span>
+    <span><span class="k">Sorgente</span><span id="stSrc">--</span></span>
+    <span class="opt"><span class="k">Risoluzione</span><span id="stRes">--</span></span>
+    <span class="opt" id="stProbe"><span class="k">Puntatore</span><span id="stLL">--</span></span>
+    <span class="grow"></span>
+    <span class="demo" id="stDemo" hidden>Modalità dimostrativa</span>
+    <span class="net" id="stNet"><span class="spin"></span><span id="stNetT">Pronto</span></span>
+    <span class="opt"><span class="k">Aggiornato</span><span id="stUpd">--</span></span>
+  </div>
+</footer>
+
+<!-- Intervallo personalizzato -->
+<div class="modal-bg" id="rangeModal" role="dialog" aria-modal="true" aria-labelledby="rangeTitle">
+  <div class="modal glass" style="width:min(440px,100%)">
+    <div class="modal-h"><h2 id="rangeTitle">Intervallo personalizzato</h2><button class="ibtn" data-close><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="modal-b">
+      <p class="muted small" style="margin-top:0">Orari in UTC. Al massimo 120 fotogrammi: il passo si allarga da solo se serve.</p>
+      <div class="field" style="grid-template-columns:70px 1fr"><label for="rFrom">Dal</label><input class="txt" type="datetime-local" id="rFrom"></div>
+      <div class="field" style="grid-template-columns:70px 1fr"><label for="rTo">Al</label><input class="txt" type="datetime-local" id="rTo"></div>
+      <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" data-close>Annulla</button><button class="btn primary" id="rApply">Applica intervallo</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Esportazione GIF -->
+<div class="modal-bg" id="gifModal" role="dialog" aria-modal="true" aria-labelledby="gifTitle">
+  <div class="modal glass" style="width:min(460px,100%)">
+    <div class="modal-h"><h2 id="gifTitle">Esporta animazione GIF</h2><button class="ibtn" data-close><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="modal-b">
+      <div class="field" style="grid-template-columns:110px 1fr"><label for="gifW">Larghezza</label>
+        <select class="sel" id="gifW"><option value="640">640 px</option><option value="900" selected>900 px</option><option value="1280">1280 px</option><option value="0">Come lo schermo</option></select></div>
+      <div class="field" style="grid-template-columns:110px 1fr"><label for="gifFps">Velocità</label>
+        <select class="sel" id="gifFps"><option value="4">4 fotogrammi/s</option><option value="6" selected>6 fotogrammi/s</option><option value="10">10 fotogrammi/s</option></select></div>
+      <label class="check"><input type="checkbox" id="gifStamp" checked> Scrivi data, ora e sorgente su ogni fotogramma</label>
+      <p class="muted small mp4-warn">La GIF ha al massimo 256 colori: sfumature di nubi e mare escono a bande. Per la qualità migliore usa il <button type="button" class="linkbtn" id="gifToMp4">video MP4</button> (consigliato).</p>
+      <div class="export-prog" id="gifProg"><b></b></div>
+      <p class="muted small" id="gifMsg" aria-live="polite">Fotogrammi da esportare: --</p>
+      <div class="exp-res" id="gifRes" hidden></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="gifClose" data-close>Chiudi</button><button class="btn ghost" id="gifStop" hidden>Annulla</button><button class="btn primary" id="gifGo">Crea GIF</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Salva immagine PNG -->
+<div class="modal-bg" id="pngModal" role="dialog" aria-modal="true" aria-labelledby="pngTitle">
+  <div class="modal glass" style="width:min(560px,100%)">
+    <div class="modal-h"><h2 id="pngTitle">Salva immagine PNG</h2><button class="ibtn" data-close><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="modal-b">
+      <div class="export-prog" id="pngProg"><b></b></div>
+      <p class="muted small" id="pngMsg" aria-live="polite">&nbsp;</p>
+      <div class="exp-res" id="pngRes" hidden></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="pngClose" data-close>Chiudi</button><button class="btn ghost" id="pngStop" hidden>Annulla</button><button class="btn primary" id="pngGo">Rifai l’immagine</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Esportazione MP4 -->
+<div class="modal-bg" id="mp4Modal" role="dialog" aria-modal="true" aria-labelledby="mp4Title">
+  <div class="modal glass" style="width:min(560px,100%)">
+    <div class="modal-h"><h2 id="mp4Title">Esporta video MP4</h2><button class="ibtn" data-close><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="modal-b mp4-form">
+      <div class="field"><label for="mp4Res">Risoluzione</label>
+        <select class="sel" id="mp4Res">
+          <option value="vista">Vista corrente (come lo schermo)</option>
+          <option value="720">720p (1280 × 720)</option>
+          <option value="1080" selected>1080p Full HD (1920 × 1080)</option>
+          <option value="1440">1440p QHD (2560 × 1440)</option>
+          <option value="2160">4K (3840 × 2160)</option>
+        </select></div>
+      <div class="field"><label for="mp4Q">Qualità</label>
+        <select class="sel" id="mp4Q"><option value="standard">Standard</option><option value="alta" selected>Alta</option><option value="massima">Massima (file più grande)</option></select></div>
+      <div class="field"><label for="mp4Fps">Velocità</label>
+        <select class="sel" id="mp4Fps"><option value="4">4 fotogrammi/s</option><option value="6">6 fotogrammi/s</option><option value="8" selected>8 fotogrammi/s</option><option value="10">10 fotogrammi/s</option><option value="12">12 fotogrammi/s</option><option value="15">15 fotogrammi/s</option><option value="20">20 fotogrammi/s</option><option value="24">24 fotogrammi/s</option><option value="30">30 fotogrammi/s</option></select></div>
+      <div class="field"><label for="mp4From">Fotogrammi</label>
+        <div class="row mp4-range"><select class="sel" id="mp4From" aria-label="Dal fotogramma"></select><span class="muted small">→</span><select class="sel" id="mp4To" aria-label="Al fotogramma"></select>
+          <select class="sel" id="mp4Step" aria-label="Passo"><option value="1" selected>tutti</option><option value="2">1 su 2</option><option value="3">1 su 3</option><option value="6">1 su 6</option></select></div></div>
+      <div class="field"><label for="mp4Rep">Ripeti</label>
+        <div class="row"><select class="sel" id="mp4Rep"><option value="1" selected>1 volta</option><option value="2">2 volte</option><option value="3">3 volte</option><option value="5">5 volte</option><option value="10">10 volte</option></select>
+          <label for="mp4Pause" class="muted small" style="white-space:nowrap">pausa finale</label>
+          <select class="sel" id="mp4Pause"><option value="0">nessuna</option><option value="0.5">0,5 s</option><option value="1" selected>1 s</option><option value="2">2 s</option><option value="3">3 s</option><option value="5">5 s</option></select></div></div>
+      <label class="check"><input type="checkbox" id="mp4Stamp" checked> Data e ora (UTC e Italia), satellite e layer su ogni fotogramma</label>
+      <label class="check"><input type="checkbox" id="mp4Legend" checked> Legenda colori e scala delle distanze</label>
+      <label class="check"><input type="checkbox" id="mp4Logo" checked> Logo “Meteo Sat” discreto</label>
+      <label class="check" id="mp4DiskRow"><input type="checkbox" id="mp4Disk"> Scrivi direttamente su disco mentre codifica (per video lunghi: chiede dove salvare)</label>
+      <p class="muted small mp4-info" id="mp4Info">Controllo cosa sa fare il browser…</p>
+      <p class="muted small mp4-warn" id="mp4Warn" hidden></p>
+      <div class="export-prog" id="mp4Prog"><b></b></div>
+      <p class="muted small" id="mp4Msg" aria-live="polite">&nbsp;</p>
+      <div class="exp-res" id="mp4Res2" hidden></div>
+      <div class="row" style="justify-content:flex-end"><button class="btn ghost" id="mp4Close" data-close>Chiudi</button><button class="btn ghost" id="mp4Stop" hidden>Annulla</button><button class="btn primary" id="mp4Go">Crea MP4</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Guida -->
+<div class="modal-bg" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal glass">
+    <div class="modal-h"><h2 id="helpTitle">Guida rapida</h2><button class="ibtn" data-close><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="modal-b">
+      <div class="guide">
+        <h3>Che cosa stai guardando</h3>
+        <dl>
+          <dt>GeoColor</dt><dd>Immagine a colori quasi naturali di giorno; di notte nuvole basse in azzurro e luci delle città. Il modo più intuitivo per seguire le nuvole.</dd>
+          <dt>Infrarosso (Banda 13, 10,3 µm)</dt><dd>Temperatura della superficie o della cima delle nubi, giorno e notte. Più è freddo, più la nube è alta: i colori vivaci indicano temporali intensi e cicloni. Con la sonda leggi la temperatura in °C.</dd>
+          <dt>Visibile (Banda 2 / Banda 3)</dt><dd>Luce solare riflessa, risoluzione fino a 0,5–1 km. Massimo dettaglio, ma solo di giorno.</dd>
+          <dt>Masse d'aria (Air Mass RGB)</dt><dd>Masse d'aria: rosso-arancio = aria secca stratosferica (correnti a getto, ciclogenesi), verde = aria tropicale calda e umida, blu-viola = aria fredda polare, bianco = nubi alte e spesse.</dd>
+          <dt>Polveri (Dust RGB)</dt><dd>Rosa-magenta = polvere sospesa (es. sabbia sahariana); rosso scuro = nubi alte e spesse; azzurro = superficie limpida. C'è anche dal Meteosat sull'Oceano Indiano e come mosaico mondiale ogni 3 ore.</dd>
+        </dl>
+        <dl>
+          <dt>Temperatura incendi (Fire Temperature RGB)</dt><dd>Incendi attivi: dal rosso (fuoco debole) al giallo-bianco (molto intenso). Di giorno il suolo caldo appare rossastro.</dd>
+          <dt>Anomalie termiche VIIRS / MODIS</dt><dd>Punti dei fuochi rilevati dai satelliti polari, 1–2 passaggi al giorno, risoluzione 375 m–1 km.</dd>
+          <dt>Alta risoluzione (zoom stretto)</dt><dd>Risoluzione nativa: Sentinel-2 e Landsat (HLS) 30 m, ritardo circa 2 giorni e copertura a strisce (se vuoto, torna indietro di qualche giorno); VIIRS falsi colori 375 m e MODIS 7-2-1 250–500 m, aggiornati in giornata: bruciato rosso-bruno, fuochi arancio, fumo quasi trasparente. Oltre lo zoom nativo l'immagine viene ingrandita a pixel netti, senza aggiungere dettaglio.</dd>
+          <dt>Risoluzione piena (originali)</dt><dd>GOES-East, GOES-West e Himawari-9 ricostruiti dai file originali NOAA: colore vero e visibile a 0,5 km veri (zoom 9), infrarosso a 2 km con temperatura in °C (palette e sonda come gli altri IR), GeoColor senza luci delle città di notte. Ritardo 10-15 minuti, quindi più freschi delle immagini NASA. Il primo istante di una zona nuova arriva in circa 10-15 secondi (in basso compare “Preparo i dati originali…”), poi è veloce. L'animazione parte appena 2-3 fotogrammi sono mostrabili: prima compare una versione meno dettagliata di tutti i fotogrammi, poi ognuno viene sostituito dalla risoluzione piena; sopra la timeline leggi “N fotogrammi su M pronti” con il tempo stimato. La cache occupa spazio su disco (pulizia automatica oltre 20 GB).</dd>
+          <dt>Alta risoluzione qui (tasto H)</dt><dd>Sceglie da solo l'immagine più nitida che copre davvero il centro della mappa (o il punto cliccato, dal riquadro coordinate): Americhe, Pacifico, Asia e Oceania → originale GOES/Himawari a colori a 0,5 km; Europa e Africa → Meteosat MTG in diretta più il mosaico polare VIIRS/MODIS del giorno; in più, se c'è, Sentinel-2 a 30 m dell'ultimo passaggio (fino a 10 giorni fa) sopra a tutto, spegnibile con l'occhio.</dd>
+          <dt>Banda giorno/notte VIIRS</dt><dd>Luci delle città, incendi, aurore e nubi illuminate dalla Luna.</dd>
+          <dt>Polari Metop (AVHRR)</dt><dd>Mosaico mondiale delle ultime 6 orbite di Metop-B e Metop-C, poli compresi: di giorno colori naturali (ghiaccio e neve azzurri), di notte RGB nebbia (nebbia verde-azzurro chiaro, nubi alte rosso-arancio). Ritardo 3-6 ore, si vedono le strisce delle orbite.</dd>
+          <dt>Aerosol (AOD) e gas (NO₂, SO₂, CO)</dt><dd>Spessore ottico di polveri e fumo; inquinanti dell'aria e pennacchi vulcanici. Dati giornalieri.</dd>
+          <dt>Temperatura del mare e precipitazioni</dt><dd>Temperatura della superficie del mare; intensità di pioggia stimata da satellite (IMERG, ogni 30 min).</dd>
+        </dl>
+        <h3>Come si usa</h3>
+        <dl>
+          <dt>Livelli</dt><dd>Spunta i layer dal catalogo, regola l'opacità e l'ordine. I layer satellitari si muovono tutti insieme sulla timeline.</dd>
+          <dt>Animazione, zoom e spostamenti</dt><dd>Quando ingrandisci o sposti la mappa l'animazione non si ferma: i fotogrammi già scaricati vengono subito ingranditi (o rimpiccioliti) e restano visibili, sfocati, mentre arrivano i tasselli nuovi, che li sostituiscono uno per uno. Prima arriva il fotogramma che stai guardando, poi i successivi; i tasselli intorno alla vista e lo zoom vicino si caricano in silenzio, quindi un piccolo spostamento o un passo di rotella sono quasi immediati, e tornando a uno zoom già visto non si riscarica nulla. Nella striscia dei fotogrammi: barra piena = pronto alla risoluzione piena, barra a righe = visibile in anteprima.</dd>
+          <dt>Coste e confini</dt><dd>Nel pannello Livelli, riquadro “Coste e confini”: linee disegnate sempre sopra tutti i satelliti, nitide a ogni zoom e visibili anche mentre le immagini si caricano. Interruttori separati per coste e isole, laghi, fiumi principali, confini di stato e regionali; colore (bianco, giallo, nero, arancio o a scelta), spessore, opacità e contorno di contrasto. Dati Natural Earth 1:10 milioni (pubblico dominio), salvati sul PC: funzionano anche senza internet. Precisione circa 1 km: a zoom molto stretti la linea può discostarsi di poco dalla costa vera. In alternativa resta la vecchia linea NASA (Fonte: NASA GIBS). Le linee compaiono anche in PNG, GIF e MP4.</dd>
+          <dt>Legenda dei colori (ogni layer)</dt><dd>Ogni layer ha la sua legenda in italiano. <b>Sotto il puntatore</b> compare un riquadro con, per ogni layer visibile (dal più alto), il colore, il nome della voce, la sua definizione e, dove esiste, il valore vero (es. −47 °C, 4–7 mm/h, NO₂ in 10¹⁵ molecole/cm²); dove l'immagine è trasparente la riga non compare, se il colore non somiglia a nessuna voce leggi “Colore non in legenda”. Sul telefono lo stesso riquadro compare toccando la mappa. <b>Nel pannello Livelli</b> apri “Legenda: che cosa significano i colori” sotto il layer per l'elenco completo con le definizioni, la fonte ufficiale e le note. <b>Sulla mappa</b>, in basso a sinistra, c'è la legenda compatta dei layer attivi (tasto × per nasconderla, “Legenda” per riaprirla; la casella “Definizioni al passaggio” spegne il riquadro sotto il puntatore). Cliccando una voce la sua definizione resta visibile e sulla mappa vengono attenuati tutti gli altri colori, così vedi dove compare (riclicca per togliere). Tre tipi: <b>scala di valori</b> (colori e numeri dalle tabelle ufficiali NASA GIBS ed EUMETSAT), <b>composizione RGB</b> (categorie dalle guide ufficiali EUMETSAT/CIRA/NASA: nelle RGB il colore è una lettura indicativa, le voci incerte sono segnate “indicativo”), <b>colori reali</b> (come leggere l'immagine). La legenda compare anche nelle immagini PNG, GIF e MP4.</dd>
+          <dt>Palette</dt><dd>Seleziona un layer in mappa e scegli una scala colori: l'infrarosso diventa leggibile come nei programmi di ricezione classici. Le soglie in °C decidono quali nubi colorare.</dd>
+          <dt>Anomalie</dt><dd>Uragani, incendi, vulcani, polveri e alluvioni aperti in tutto il mondo. Un clic porta sul luogo, sceglie il layer adatto e anima le ultime ore.</dd>
+          <dt>Salvare immagini e video</dt><dd>Fotocamera = immagine PNG; pellicola = GIF; <b>MP4</b> = video H.264 (consigliato: si apre ovunque, telefono, WhatsApp, YouTube, PowerPoint). Si apre sempre una finestra con l'avanzamento, il tempo che manca e “Annulla”; alla fine compaiono l'anteprima, il nome del file e i MB, con due pulsanti: <b>Salva con nome…</b> (scegli tu cartella e nome) e <b>Scarica</b> (finisce nella Cartella Download del browser). Per l'MP4 scegli risoluzione (vista corrente, 720p, 1080p, 1440p, 4K), qualità (Standard, Alta, Massima: 1080p circa 12, 20 o 30 Mbit/s), velocità, quali fotogrammi della timeline, ripetizioni e pausa finale; la finestra mostra prima di partire risoluzione, bitrate, durata e MB stimati. Il video non è uno schermo ingrandito: la mappa viene ridisegnata fuori schermo esattamente alla risoluzione scelta, con i tasselli dello zoom giusto (1 pixel del video = 1 pixel dell'immagine satellitare; oltre la risoluzione nativa a pixel netti) e per ogni fotogramma aspetta che tutti i tasselli siano arrivati. Ogni fotogramma riporta data e ora UTC e italiana, satellite, legenda, scala e logo; valgono layer sovrapposti, palette e confronto a tendina. La GIF ha al massimo 256 colori (sfumature a bande): per la qualità usa l'MP4. Per video molto lunghi spunta “Scrivi direttamente su disco”. Durante l'esportazione la mappa dietro la finestra cambia dimensione e zoom: è normale, alla fine torna com'era.</dd>
+        </dl>
+        <div>
+          <dt style="font-weight:600;font-size:13px;margin-top:8px">Tasti rapidi</dt>
+          <div class="keys" style="margin-top:8px">
+            <kbd>Spazio</kbd><span>Avvia o ferma l'animazione</span>
+            <kbd>← →</kbd><span>Fotogramma precedente / successivo</span>
+            <kbd>Home Fine</kbd><span>Primo / ultimo fotogramma</span>
+            <kbd>L</kbd><span>Pannello livelli</span>
+            <kbd>A</kbd><span>Pannello anomalie</span>
+            <kbd>C</kbd><span>Confronto a tendina</span>
+            <kbd>F</kbd><span>Schermo intero</span>
+            <kbd>H</kbd><span>Alta risoluzione qui</span>
+            <kbd>?</kbd><span>Questa guida</span>
+          </div>
+        </div>
+        <p class="muted small" style="grid-column:1/-1;margin:14px 0 0">Dati: NASA GIBS / Worldview, EUMETSAT EUMETView, NOAA GOES e Himawari su AWS (file originali), NASA EONET, GDACS (UE/ONU). Le immagini geostazionarie NASA arrivano con 20–40 minuti di ritardo, quelle originali con 10–15.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/gif.js"></script>
+<script src="vendor/mp4-muxer.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
